@@ -35,4 +35,40 @@ userRouter.get("/users/:id", async (request, response) => {
     }
 });
 
+userRouter.patch("/users/:id", async (request, response) => {
+    const allowedProperties = ["name", "email", "password"];
+    const properties = Object.keys(request.body);
+    const isValid = properties.every((property) =>
+        allowedProperties.includes(property)
+    );
+    if (!isValid || properties.length < 1) {
+        return response.status(400).send({ error: "Invalid value." });
+    }
+
+    try {
+        const user = await User.findById(request.params.id);
+        if (!user) {
+            return response.status(404).send({ error: "User Not Found." });
+        }
+        properties.forEach((property) => {
+            user[property] = request.body[property];
+        });
+        await user.save();
+        response.send(user);
+    } catch (e) {
+        response.status(500).send(e.message);
+    }
+});
+userRouter.delete("/users/:id", async (request, response) => {
+    try {
+        const user = await User.findByIdAndDelete(request.params.id);
+        if (!user) {
+            return response.status(404).send({ error: "User Not Found." });
+        }
+        response.send(user);
+    } catch (e) {
+        response.status(500).send(e.message);
+    }
+});
+
 module.exports = userRouter;
