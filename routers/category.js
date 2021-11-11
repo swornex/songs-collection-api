@@ -1,21 +1,24 @@
 const { Router } = require("express");
 
 const Category = require("../models/categoryModel");
+const validationHandler = require("../handler/validationHandler");
+const auth = require("../middleware/authenticate");
 
 const categoryRouter = Router();
 
-categoryRouter.post("/categories", async (request, response) => {
+categoryRouter.post("/categories", auth, async (request, response) => {
     const { categoryName } = request.body;
     const category = new Category({ categoryName });
     try {
         await category.save();
         response.status(201).send(category);
     } catch (e) {
-        response.status(500).send({ error: e.message });
+        const error = validationHandler(e);
+        response.status(500).send({ error });
     }
 });
 
-categoryRouter.get("/categories", async (request, response) => {
+categoryRouter.get("/categories", auth, async (request, response) => {
     try {
         const categories = await Category.find();
         response.send(categories);
@@ -24,7 +27,7 @@ categoryRouter.get("/categories", async (request, response) => {
     }
 });
 
-categoryRouter.get("/categories/:id", async (request, response) => {
+categoryRouter.get("/categories/:id", auth, async (request, response) => {
     try {
         const category = await Category.findById(request.params.id);
         if (!category) {
@@ -36,7 +39,7 @@ categoryRouter.get("/categories/:id", async (request, response) => {
     }
 });
 
-categoryRouter.patch("/categories/:id", async (request, response) => {
+categoryRouter.patch("/categories/:id", auth, async (request, response) => {
     const properties = Object.keys(request.body);
 
     if (properties.length != 1 || properties[0] != "categoryName") {
@@ -53,11 +56,12 @@ categoryRouter.patch("/categories/:id", async (request, response) => {
         await category.save();
         response.send(category);
     } catch (e) {
-        response.status(500).send({ error: e.message });
+        const error = validationHandler(e);
+        response.status(500).send({ error });
     }
 });
 
-categoryRouter.delete("/categories/:id", async (request, response) => {
+categoryRouter.delete("/categories/:id", auth, async (request, response) => {
     try {
         const category = await Category.findByIdAndDelete(request.params.id);
         if (!category) {

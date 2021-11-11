@@ -1,8 +1,10 @@
 const { Router } = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+
 const User = require("../models/userModel");
 const auth = require("../middleware/authenticate");
+const validationHandler = require("../handler/validationHandler");
 
 const userRouter = Router();
 
@@ -16,15 +18,15 @@ userRouter.post("/users", async (request, response) => {
         });
         response.status(201).send({ user, token });
     } catch (e) {
-        response.status(400).send({ error: e.message });
+        const error = validationHandler(e);
+        response.status(400).send({ error });
     }
 });
 
-userRouter.post("/users/login", auth, async (request, response) => {
+userRouter.post("/users/login", async (request, response) => {
     const { email, password } = request.body;
     try {
         const user = await User.findOne({ email });
-        console.log(user);
         if (!user) {
             throw new Error("Incorect email or password.");
         }
@@ -92,7 +94,8 @@ userRouter.patch("/users/:id", auth, async (request, response) => {
         await user.save();
         response.send(user);
     } catch (e) {
-        response.status(500).send(e.message);
+        const error = validationHandler(e);
+        response.status(500).send({ error });
     }
 });
 userRouter.delete("/users/:id", auth, async (request, response) => {
@@ -103,7 +106,7 @@ userRouter.delete("/users/:id", auth, async (request, response) => {
         }
         response.send(user);
     } catch (e) {
-        response.status(500).send(e.message);
+        response.status(500).send({ error: e.message });
     }
 });
 
