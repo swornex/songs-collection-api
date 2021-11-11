@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 require("dotenv").config(".env");
 
 const userRouter = require("./routers/user");
+const categoryRouter = require("./routers/category");
 
 const app = express();
 
@@ -10,6 +11,7 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(userRouter);
+app.use(categoryRouter);
 
 mongoose
     .connect("mongodb://localhost:27017/song-collection")

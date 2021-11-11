@@ -11,7 +11,6 @@ userRouter.post("/users", async (request, response) => {
     const user = new User({ name, email, password });
     try {
         await user.save();
-        console.log(process.env.SECRET_TOKEN);
         const token = jwt.sign({ id: user._id }, process.env.SECRET_TOKEN, {
             expiresIn: "5h"
         });
