@@ -11,7 +11,6 @@ const validationHandler = (e) => {
         });
     }
     return error;
-    console.log(e);
 };
 
 module.exports = validationHandler;
